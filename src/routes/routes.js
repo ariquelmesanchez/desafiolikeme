@@ -1,13 +1,18 @@
 const { Router } = require('express')
-const path = require('path')
-const { handleGetPosts,handleCreatetPost } = require('../controllers')
+const { 
+    handleGetPosts,
+    handleCreatePost,
+    handleLikePosts,
+    handleDeletion
+  } = require('../controllers/post.controller')
 
 const router = Router()
 
-router.get('/', (req,res) => {
-    res.sendFile(path.join(__dirname + '/../index.html'))
-})
-
-router.get('/posts', handleGetPosts)
-
-router.post('/comentarios', handleCreatePost)
+router.get("/posts", handleGetPosts);
+router.post("/posts", handleCreatePost);
+router.put("/posts/like/:id", handleLikePosts);
+router.delete("/posts/:id", handleDeletion);
+router.get("/", (req, res) => {
+  res.send("¡El servidor está funcionando correctamente!");
+});
+module.exports = router;

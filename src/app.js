@@ -1,37 +1,16 @@
-const express = require('express')
-const cors = require('cors')
-const pool = require('./config/db')
+const express = require("express");
+const routes = require("./routes/routes");
+const morgan = require("morgan");
+const cors = require("cors");
 
-const app = express()
+const app = express();
+app.use(express.json());
+app.use(morgan("dev"));
+app.use(cors());
 
-app.use(cors())
+app.use("/", routes);
+app.use((req, res, next) => {
+    res.status(404).json({ msg: "Ruta no encontrada" });
+  });
 
-app.use(express.json())
-
-app.get('/posts', async (req,res) => {
-    try {
-        const result = await pool.query( 'select * from posts');
-        res,json(result.rows)
-    } catch (error) {
-        console.error('error al obtener posts', error)
-        res.status(500).json({ error: 'Error al obtener los posts'})
-        
-    }
-})
-
-app.post('/posts', async (req,res) => {
-    const { title, img, description } = req.body
-    try {
-        const result = await pool.query(
-            'insert into posts (titulo, img, descripcion, likes) values ($1, $2, $3, 0) returning *',
-            [titulo, img, descripcion]
-        )
-        res.status(201).json(results.rows[0])
-    } catch (error) {
-        console.error('Error al crear post', error)
-        res.status(500).json({ error: 'Error al crear post'})
-        
-    }
-})
-
-module.exports = app
+module.exports = app;

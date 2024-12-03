@@ -1,31 +1,53 @@
-const { DB } = require('../config/db')
+const { DB } = require('../config/db');
 
-const addPost = async ( titulo, url, descripcion) => {
-
+// Función para obtener todos los posts
+const obtenerTodos = async () => {
     try {
-        const SQLQuery = "insert into posts values (DEFAULT, $1, $2, $3, DEFAULT)"
-        const SQLValues = [titulo, url, descripcion]
-        const result = await DB.query(SQLQuery, SQLValues)
-        console.log(result)
-    }   catch (error) {
-        throw error
+        const result = await DB.query('SELECT * FROM posts');
+        return result.rows;  // Asegúrate de que estás devolviendo los resultados correctos
+    } catch (error) {
+        throw new Error('Error al obtener los posts: ' + error.message);
     }
-
 };
 
-const getAll = async () => {
+// Función para agregar un nuevo post
+const agregar = async (titulo, img, descripcion, likes = 0) => {
     try {
-        const SQLQuery = "select * from posts"
-        const [ rows ] = await DB.query(SQLQuery)
-        return rows
+        const SQLQuery = "INSERT INTO posts (titulo, img, descripcion, likes) VALUES ($1, $2, $3, $4)";
+        const SQLValues = [titulo, img, descripcion, likes];
+        const result = await DB.query(SQLQuery, SQLValues);
+        return result.rows[0];  // Retorna el post agregado
     } catch (error) {
-        throw error
+        throw error;
     }
-}
+};
 
+// Función para like en un post
+const like = async (id) => {
+    try {
+        const SQLQuery = "UPDATE posts SET likes = likes + 1 WHERE id = $1 RETURNING *";
+        const result = await DB.query(SQLQuery, [id]);
+        return result.rows[0];  // Devuelve el post actualizado con el nuevo like
+    } catch (error) {
+        throw error;
+    }
+};
 
+// Función para eliminar un post
+const eliminar = async (id) => {
+    try {
+        const SQLQuery = "DELETE FROM posts WHERE id = $1 RETURNING *";
+        const result = await DB.query(SQLQuery, [id]);
+        return result.rows[0];  // Devuelve el post eliminado
+    } catch (error) {
+        throw error;
+    }
+};
 
-module.exports ={
-    addPost,
-    getAll
-}
+// Exportando todas las funciones
+module.exports = {
+    obtenerTodos,
+    agregar,
+    like,
+    eliminar
+};
